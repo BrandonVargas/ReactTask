@@ -11,6 +11,7 @@
     "@types/react-select": "^3.0.10",
     "@types/recharts": "^1.8.5",
     "graphql": "^14.5.8",
+    "graphql-tag": "^2.10.3",
     "isomorphic-fetch": "^2.2.1",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",

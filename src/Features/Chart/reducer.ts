@@ -13,18 +13,21 @@ const slice = createSlice({
   reducers: {
     addNewMeasuramentRecevied: (state, action: PayloadAction<Measurament>) => {
       const newMeasurament = action.payload;
-      const lastItemMeasurementValue =
+      const itemExists = !!state.multipleMeasuraments[state.multipleMeasuraments.length - 1]
+      if (itemExists) {
+        const lastItemMeasurementValue =
         state.multipleMeasuraments[state.multipleMeasuraments.length - 1][newMeasurament.metric];
-      const lastItemMeasurementAt = state.multipleMeasuraments[state.multipleMeasuraments.length - 1]['at'];
-      if (newMeasurament.at === lastItemMeasurementAt && newMeasurament.value !== lastItemMeasurementValue) {
-        state.multipleMeasuraments[state.multipleMeasuraments.length - 1][newMeasurament.metric] = newMeasurament.value;
-      } else if (newMeasurament.at !== lastItemMeasurementAt && newMeasurament.value !== lastItemMeasurementValue) {
-        const newValue = Object.assign({}, state.multipleMeasuraments[state.multipleMeasuraments.length - 1], {
-          at: newMeasurament.at,
-          [newMeasurament.metric]: newMeasurament.value,
-        });
-        state.multipleMeasuraments.push(newValue);
-        state.multipleMeasuraments.shift();
+        const lastItemMeasurementAt = state.multipleMeasuraments[state.multipleMeasuraments.length - 1]['at'];
+        if (newMeasurament.at === lastItemMeasurementAt && newMeasurament.value !== lastItemMeasurementValue) {
+          state.multipleMeasuraments[state.multipleMeasuraments.length - 1][newMeasurament.metric] = newMeasurament.value;
+        } else if (newMeasurament.at !== lastItemMeasurementAt && newMeasurament.value !== lastItemMeasurementValue) {
+          const newValue = Object.assign({}, state.multipleMeasuraments[state.multipleMeasuraments.length - 1], {
+            at: newMeasurament.at,
+            [newMeasurament.metric]: newMeasurament.value,
+          });
+          state.multipleMeasuraments.push(newValue);
+          state.multipleMeasuraments.shift();
+        }
       }
     },
     multipleMeasuramentReceived: (state, action: PayloadAction<Array<ChartDataType>>) => {

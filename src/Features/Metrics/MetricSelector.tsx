@@ -3,7 +3,7 @@ import { useSubscription } from 'urql';
 import { createStyles, makeStyles, useTheme, Theme } from '@material-ui/core/styles';
 import { IState } from '../../store';
 import { actions } from './reducer';
-import { useDispatch, useSelector, connect } from 'react-redux';
+import { useDispatch, connect } from 'react-redux';
 import Input from '@material-ui/core/Input';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
