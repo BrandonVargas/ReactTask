@@ -3,45 +3,48 @@ import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
 import CardContent from '@material-ui/core/CardContent';
 import { IState } from '../../store';
-import { createStyles, makeStyles, useTheme, Theme } from '@material-ui/core/styles';
-import { useDispatch, useSelector } from 'react-redux';
+import { makeStyles } from '@material-ui/core/styles';
+import { useDispatch, connect } from 'react-redux';
 import { useQuery } from 'urql';
 import { actions } from './reducer';
 import { LinearProgress } from '@material-ui/core';
 import { getLastKnownMeasurementQuery } from '../../store/api/queries';
+import { getMeasurament } from './selectors';
+import { Measurament } from '../Chart/reducer';
 
 interface MetricProps {
+  measuraments: Array<Measurament>;
   metricName: string;
 }
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    card: {
-      maxWidth: '20%',
-      margin: '2%',
-    },
-  }),
-);
+const useStyles = makeStyles({
+  card: {
+    maxWidth: '20%',
+    margin: '2%',
+    flexGrow: 1,
+  },
+  value: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+  },
+});
 
-const getMesurament = (state: IState) => {
-  const { measuraments } = state.metricsSelector;
-  return { measuraments };
-};
-
-const Metric: React.FC<MetricProps> = ({ metricName }) => {
+const Metric: React.FC<MetricProps> = ({ measuraments, metricName }) => {
   const classes = useStyles();
-  const theme = useTheme();
   const dispatch = useDispatch();
-  const { measuraments } = useSelector(getMesurament);
+
+  const measurament = measuraments.find(e => e.metric === metricName);
 
   const [result] = useQuery({
     query: getLastKnownMeasurementQuery,
     variables: { metricName },
+    pause: !!measurament,
   });
   const { fetching, data, error } = result;
 
   useEffect(() => {
     if (error) {
-      //TODO
+      dispatch(actions.apiErrorReceived({ error: error.message }));
     }
     if (!data) return;
 
@@ -50,9 +53,8 @@ const Metric: React.FC<MetricProps> = ({ metricName }) => {
 
   if (fetching) return <LinearProgress />;
 
-  const measurament = measuraments.find(e => e.metric === metricName);
-  var value = data.getLastKnownMeasurement.value;
-  var unit = data.getLastKnownMeasurement.unit;
+  var value = 0;
+  var unit: string | undefined = '';
 
   if (measurament) {
     value = measurament.value;
@@ -63,11 +65,19 @@ const Metric: React.FC<MetricProps> = ({ metricName }) => {
     <Card className={classes.card}>
       <CardContent>
         <Typography variant={'h6'}>{metricName}</Typography>
-        <Typography variant={'h3'}>{value}</Typography>
-        <Typography variant={'h4'}>{unit}</Typography>
+        <div className={classes.value}>
+          <Typography variant={'h5'}>{value}</Typography>
+          <Typography variant={'h6'}>({unit})</Typography>
+        </div>
       </CardContent>
     </Card>
   );
 };
 
-export default Metric;
+const mapStateToProps = (state: IState) => {
+  return {
+    measuraments: getMeasurament(state)
+  };
+};
+
+export default connect(mapStateToProps)(Metric);

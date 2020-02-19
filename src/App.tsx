@@ -8,10 +8,9 @@ import { Provider as UrqlProvider } from 'urql';
 import 'react-toastify/dist/ReactToastify.css';
 import Header from './components/Header';
 import Wrapper from './components/Wrapper';
-import NowWhat from './components/NowWhat';
-import MetricSelector from './Features/Metrics/MetricSelector';
 import { Client, defaultExchanges, subscriptionExchange } from 'urql';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
+import Dashboard from './components/Dashboard';
 
 const subscriptionClient = new SubscriptionClient('wss://react.eogresources.com/graphql', {
   reconnect: true,
@@ -49,8 +48,7 @@ const App = () => (
       <UrqlProvider value={client}>
         <Wrapper>
           <Header />
-          <MetricSelector />
-          <NowWhat />
+          <Dashboard/>
           <ToastContainer />
         </Wrapper>
       </UrqlProvider>

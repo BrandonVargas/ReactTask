@@ -6,7 +6,7 @@ export type MetricData = {
 
 export type Measurament = {
   metric: string;
-  at: string;
+  at: number;
   value: number;
   unit: string;
 };
@@ -18,15 +18,16 @@ export type ApiErrorAction = {
 const initialState = {
   metrics: new Array<string>(),
   selectedMetrics: new Array<string>(),
-  measuraments: Array<Measurament>(),
+  measuraments: new Array<Measurament>(),
 };
+
 const slice = createSlice({
   name: 'metricsSelector',
   initialState,
   reducers: {
     metricsDataRecevied: (state, action: PayloadAction<MetricData>) => {
-      const metrics = action.payload;
-      state.metrics = metrics.getMetrics;
+      const { getMetrics } = action.payload;
+      state.metrics = getMetrics;
     },
     metricSelected: (state, action: PayloadAction<string[]>) => {
       const selectedMetric = action.payload;
@@ -42,7 +43,7 @@ const slice = createSlice({
         state.measuraments.push(newMeasurament);
       }
     },
-    metricsErrorReceived: (state, action: PayloadAction<ApiErrorAction>) => state,
+    apiErrorReceived: (state, action: PayloadAction<ApiErrorAction>) => state,
   },
 });
 

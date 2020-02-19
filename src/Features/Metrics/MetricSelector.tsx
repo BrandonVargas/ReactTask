@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
-import { useQuery, useSubscription } from 'urql';
+import { useSubscription } from 'urql';
 import { createStyles, makeStyles, useTheme, Theme } from '@material-ui/core/styles';
 import { IState } from '../../store';
 import { actions } from './reducer';
 import { useDispatch, useSelector } from 'react-redux';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import Input from '@material-ui/core/Input';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
@@ -12,15 +11,20 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Metric from './Metric';
-import { getMetricsQuery } from '../../store/api/queries';
 import { NewMeasurementSubscription } from '../../store/api/subscription';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    card: {
+      width: '100vw',
+      display: 'flex',
+      flexDirection: 'column',
+    },
     formControl: {
       margin: theme.spacing(1),
-      minWidth: 200,
-      maxWidth: 500,
+      minWidth: '30%',
+      maxWidth: '50%',
+      alignSelf: 'center',
     },
     chips: {
       display: 'flex',
@@ -28,6 +32,11 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     chip: {
       margin: 1,
+    },
+    metricCards: {
+      display: 'flex',
+      flexWrap: 'nowrap',
+      justifyContent: 'center',
     },
   }),
 );
@@ -68,29 +77,18 @@ const MetricSelector = () => {
     dispatch(actions.metricSelected(event.target.value as string[]));
   };
 
-  const [result] = useQuery({ query: getMetricsQuery });
   const [resultSub] = useSubscription({
     query: NewMeasurementSubscription,
   });
-  const { fetching, data, error } = result;
 
   useEffect(() => {
     if (resultSub.data !== undefined) {
       dispatch(actions.newMeasuramentRecevied(resultSub.data.newMeasurement));
     }
-
-    if (error) {
-      //TODO
-    }
-    if (!data) return;
-
-    dispatch(actions.metricsDataRecevied(data));
-  }, [dispatch, data, resultSub, error]);
-
-  if (fetching) return <LinearProgress />;
+  }, [dispatch, resultSub]);
 
   return (
-    <div>
+    <div className={classes.card}>
       <FormControl className={classes.formControl}>
         <InputLabel id="metric-mutiple-label">Metrics</InputLabel>
         <Select
