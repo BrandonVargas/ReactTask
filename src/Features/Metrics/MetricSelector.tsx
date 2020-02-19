@@ -3,7 +3,7 @@ import { useSubscription } from 'urql';
 import { createStyles, makeStyles, useTheme, Theme } from '@material-ui/core/styles';
 import { IState } from '../../store';
 import { actions } from './reducer';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, connect } from 'react-redux';
 import Input from '@material-ui/core/Input';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
@@ -12,6 +12,12 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Metric from './Metric';
 import { NewMeasurementSubscription } from '../../store/api/subscription';
+import { getMetrics, getSelectedMetrics } from '../Chart/selectors';
+
+interface MetricSelectorProps {
+  metrics: string[];
+  selectedMetrics: string[];
+}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -38,6 +44,9 @@ const useStyles = makeStyles((theme: Theme) =>
       flexWrap: 'nowrap',
       justifyContent: 'center',
     },
+    selectLabel: {
+      position: 'relative',
+    }
   }),
 );
 
@@ -49,29 +58,19 @@ function getStyles(metric: string, selectedMetrics: string[], theme: Theme) {
 }
 
 const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 0;
 const MenuProps = {
   PaperProps: {
     style: {
-      height: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      height: ITEM_HEIGHT * 4.5,
       width: 35,
     },
   },
 };
 
-const getMetrics = (state: IState) => {
-  const { metrics, selectedMetrics } = state.metricsSelector;
-  return {
-    metrics,
-    selectedMetrics,
-  };
-};
-
-const MetricSelector = () => {
+const MetricSelector: React.FC<MetricSelectorProps> = ({metrics, selectedMetrics}) => {
   const classes = useStyles();
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { metrics, selectedMetrics } = useSelector(getMetrics);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     dispatch(actions.metricSelected(event.target.value as string[]));
@@ -90,7 +89,7 @@ const MetricSelector = () => {
   return (
     <div className={classes.card}>
       <FormControl className={classes.formControl}>
-        <InputLabel id="metric-mutiple-label">Metrics</InputLabel>
+        <InputLabel className={classes.selectLabel} id="metric-mutiple-label">Metrics</InputLabel>
         <Select
           displayEmpty={true}
           labelId="metric-mutiple-label"
@@ -124,4 +123,10 @@ const MetricSelector = () => {
   );
 };
 
-export default MetricSelector;
+const mapStateToProps = (state: IState) => {
+  return {
+    metrics: getMetrics(state),
+    selectedMetrics: getSelectedMetrics(state)
+  }
+}
+export default connect(mapStateToProps)(MetricSelector);

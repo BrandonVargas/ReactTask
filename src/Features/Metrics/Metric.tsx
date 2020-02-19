@@ -6,11 +6,10 @@ import { IState } from '../../store';
 import { makeStyles } from '@material-ui/core/styles';
 import { useDispatch, connect } from 'react-redux';
 import { useQuery } from 'urql';
-import { actions } from './reducer';
+import { actions, Measurament } from './reducer';
 import { LinearProgress } from '@material-ui/core';
 import { getLastKnownMeasurementQuery } from '../../store/api/queries';
 import { getMeasurament } from './selectors';
-import { Measurament } from '../Chart/reducer';
 
 interface MetricProps {
   measuraments: Array<Measurament>;

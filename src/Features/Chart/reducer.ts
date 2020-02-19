@@ -1,13 +1,7 @@
 import { createSlice, PayloadAction } from 'redux-starter-kit';
+import { Measurament } from '../Metrics/reducer';
 
 export type ChartDataType = { [key: string]: number };
-
-export type Measurament = {
-  metric: string;
-  at: number;
-  value: number;
-  unit: string;
-};
 
 const initialState = {
   multipleMeasuraments: new Array<ChartDataType>(),

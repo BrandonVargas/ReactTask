@@ -10,7 +10,7 @@ import { getMultipleMeasurementsQuery } from '../../store/api/queries';
 import { NewMeasurementSubscription } from '../../store/api/subscription';
 import { getSelectedMetrics, getMultipleMeasurements, getMetrics } from './selectors';
 
-export type ChartProps = {
+interface ChartProps {
   metrics: string[];
   selectedMetrics: string[];
   multipleMeasuraments: Array<ChartDataType>;
