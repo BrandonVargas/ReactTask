@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useDispatch, connect } from 'react-redux';
 import { useQuery, useSubscription } from 'urql';
 import { actions, ChartDataType } from './reducer';
-import { actions as metricActions } from '../../Features/Metrics/reducer';
+import { actions as metricActions, Measurament } from '../../Features/Metrics/reducer';
 import { getMultipleMeasurementsQuery } from '../../store/api/queries';
 import { NewMeasurementSubscription } from '../../store/api/subscription';
 import { getSelectedMetrics, getMultipleMeasurements, getMetrics } from './selectors';
@@ -75,7 +75,14 @@ const Chart = React.memo(function Chart({ metrics, selectedMetrics, multipleMeas
 
   useEffect(() => {
     if (resultSub.data !== undefined) {
-      dispatch(actions.addNewMeasuramentRecevied(resultSub.data.newMeasurement));
+      const newMeasurament = resultSub.data.newMeasurement as Measurament
+      const lastMeasurament = multipleMeasuraments[multipleMeasuraments.length - 1][newMeasurament.metric] && {}
+      const lastUpdate = multipleMeasuraments[multipleMeasuraments.length - 1]['at']
+      if (lastUpdate === newMeasurament.at && lastMeasurament !== newMeasurament.value) {
+        dispatch(actions.updateLastMeasurement(newMeasurament));
+      } else if (lastUpdate !== newMeasurament.at && lastMeasurament !== newMeasurament.value) {
+        dispatch(actions.addNewMeasuramentRecevied(newMeasurament));
+      }
     }
 
     if (multipleMeasuraments.length === 0) {
@@ -100,7 +107,7 @@ const Chart = React.memo(function Chart({ metrics, selectedMetrics, multipleMeas
       }
       dispatch(actions.multipleMeasuramentReceived(formattedData));
     }
-  }, [dispatch, resultSub, data, error, multipleMeasuraments.length]);
+  }, [dispatch, resultSub, data, error, multipleMeasuraments]);
 
   if (selectedMetrics.length === 0) {
     return null;
