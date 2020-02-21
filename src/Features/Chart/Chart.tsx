@@ -75,13 +75,15 @@ const Chart = React.memo(function Chart({ metrics, selectedMetrics, multipleMeas
 
   useEffect(() => {
     if (resultSub.data !== undefined) {
-      const newMeasurament = resultSub.data.newMeasurement as Measurament
-      const lastMeasurament = multipleMeasuraments[multipleMeasuraments.length - 1][newMeasurament.metric] && {}
-      const lastUpdate = multipleMeasuraments[multipleMeasuraments.length - 1]['at']
-      if (lastUpdate === newMeasurament.at && lastMeasurament !== newMeasurament.value) {
-        dispatch(actions.updateLastMeasurement(newMeasurament));
-      } else if (lastUpdate !== newMeasurament.at && lastMeasurament !== newMeasurament.value) {
-        dispatch(actions.addNewMeasuramentRecevied(newMeasurament));
+      if (multipleMeasuraments[multipleMeasuraments.length - 1]) {
+        const newMeasurament = resultSub.data.newMeasurement as Measurament
+        const lastMeasurament = multipleMeasuraments[multipleMeasuraments.length - 1][newMeasurament.metric]
+        const lastUpdate = multipleMeasuraments[multipleMeasuraments.length - 1]['at']
+        if (lastUpdate === newMeasurament.at && lastMeasurament !== newMeasurament.value) {
+          dispatch(actions.updateLastMeasurement(newMeasurament));
+        } else if (lastUpdate !== newMeasurament.at && lastMeasurament !== newMeasurament.value) {
+          dispatch(actions.addNewMeasuramentRecevied(newMeasurament));
+        }
       }
     }
 
