@@ -9,7 +9,7 @@ import { useQuery } from 'urql';
 import { actions, Measurament } from './reducer';
 import { LinearProgress } from '@material-ui/core';
 import { getLastKnownMeasurementQuery } from '../../store/api/queries';
-import { getMeasurament } from './selectors';
+import { getMeasuraments } from './selectors';
 
 interface MetricProps {
   measuraments: Array<Measurament>;
@@ -75,7 +75,7 @@ const Metric: React.FC<MetricProps> = ({ measuraments, metricName }) => {
 
 const mapStateToProps = (state: IState) => {
   return {
-    measuraments: getMeasurament(state)
+    measuraments: getMeasuraments(state)
   };
 };
 

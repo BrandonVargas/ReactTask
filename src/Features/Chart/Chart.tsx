@@ -1,20 +1,13 @@
 import React, { useEffect } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Legend, Tooltip, CartesianGrid } from 'recharts';
-import { IState } from '../../store';
 import { makeStyles } from '@material-ui/core/styles';
-import { useDispatch, connect, useSelector } from 'react-redux';
-import { useQuery, useSubscription } from 'urql';
+import { useDispatch, useSelector } from 'react-redux';
+import { useQuery } from 'urql';
 import { actions, ChartDataType } from './reducer';
-import { actions as metricActions, Measurament } from '../../Features/Metrics/reducer';
+import { actions as metricActions } from '../../Features/Metrics/reducer';
 import { getMultipleMeasurementsQuery } from '../../store/api/queries';
-import { NewMeasurementSubscription } from '../../store/api/subscription';
 import { getSelectedMetrics, getMultipleMeasurements, getMetrics } from './selectors';
-
-interface ChartProps {
-  metrics: string[];
-  selectedMetrics: string[];
-  multipleMeasuraments: Array<ChartDataType>;
-};
+import { getMeasuraments } from '../Metrics/selectors';
 
 const useStyles = makeStyles({
   container: {
@@ -33,6 +26,7 @@ const Chart = () => {
 
   const metrics = useSelector(getMetrics);
   const selectedMetrics = useSelector(getSelectedMetrics);
+  const latestMeasuraments = useSelector(getMeasuraments)
   const multipleMeasuraments =  useSelector(getMultipleMeasurements);
 
   const getThirtyMinutesAgo = () => {
@@ -62,23 +56,21 @@ const Chart = () => {
 
   const { data, error } = result;
 
-  const [resultSub] = useSubscription({
-    query: NewMeasurementSubscription,
-  });
-
   useEffect(() => {
-    if (resultSub.data !== undefined) {
+    metrics.forEach((metric: string, index) => {
       if (multipleMeasuraments[multipleMeasuraments.length - 1]) {
-        const newMeasurament = resultSub.data.newMeasurement as Measurament
-        const lastMeasurament = multipleMeasuraments[multipleMeasuraments.length - 1][newMeasurament.metric]
-        const lastUpdate = multipleMeasuraments[multipleMeasuraments.length - 1]['at']
-        if (lastUpdate === newMeasurament.at && lastMeasurament !== newMeasurament.value) {
-          dispatch(actions.updateLastMeasurement(newMeasurament));
-        } else if (lastUpdate !== newMeasurament.at && lastMeasurament !== newMeasurament.value) {
-          dispatch(actions.addNewMeasuramentRecevied(newMeasurament));
+        const newMeasurament = latestMeasuraments.find( measurament => measurament.metric === metric)
+        if (newMeasurament) {
+          const lastMeasurament = multipleMeasuraments[multipleMeasuraments.length - 1][metric]
+          const lastUpdate = multipleMeasuraments[multipleMeasuraments.length - 1]['at']
+          if (lastUpdate === newMeasurament.at && lastMeasurament !== newMeasurament.value) {
+            dispatch(actions.updateLastMeasurement(newMeasurament));
+          } else if (lastUpdate !== newMeasurament.at && lastMeasurament !== newMeasurament.value) {
+            dispatch(actions.addNewMeasuramentRecevied(newMeasurament));
+          }
         }
       }
-    }
+    })
 
     if (multipleMeasuraments.length === 0) {
       if (error) {
@@ -102,7 +94,7 @@ const Chart = () => {
       }
       dispatch(actions.multipleMeasuramentReceived(formattedData));
     }
-  }, [dispatch, resultSub, data, error, multipleMeasuraments, multipleMeasuraments.length]);
+  }, [dispatch, data, error, multipleMeasuraments, multipleMeasuraments.length, metrics, latestMeasuraments]);
 
   if (selectedMetrics.length === 0) {
     return null;
