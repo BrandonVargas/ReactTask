@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Legend, Tooltip, CartesianGrid } from 'recharts';
 import { IState } from '../../store';
 import { makeStyles } from '@material-ui/core/styles';
-import { useDispatch, connect } from 'react-redux';
+import { useDispatch, connect, useSelector } from 'react-redux';
 import { useQuery, useSubscription } from 'urql';
 import { actions, ChartDataType } from './reducer';
 import { actions as metricActions, Measurament } from '../../Features/Metrics/reducer';
@@ -16,17 +16,6 @@ interface ChartProps {
   multipleMeasuraments: Array<ChartDataType>;
 };
 
-const shouldRender = (prevProps: ChartProps, nextProps: ChartProps) => {
-  let shouldNotRender = false;
-  if (prevProps.multipleMeasuraments.length && nextProps.multipleMeasuraments.length) {
-    const timeBefore = prevProps.multipleMeasuraments[prevProps.multipleMeasuraments.length - 1].at;
-    const timeAfter = nextProps.multipleMeasuraments[prevProps.multipleMeasuraments.length - 1].at;
-    shouldNotRender = timeBefore === timeAfter;
-  }
-
-  return shouldNotRender;
-};
-
 const useStyles = makeStyles({
   container: {
     minWidth: '50%',
@@ -37,10 +26,14 @@ const useStyles = makeStyles({
 
 const colors: string[] = ['blue', 'red', 'yellow', 'black', 'orange', 'gray', 'green'];
 
-const Chart = React.memo(function Chart({ metrics, selectedMetrics, multipleMeasuraments }: ChartProps) {
+const Chart = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const chartHeight = window && window.innerHeight/2;
+
+  const metrics = useSelector(getMetrics);
+  const selectedMetrics = useSelector(getSelectedMetrics);
+  const multipleMeasuraments =  useSelector(getMultipleMeasurements);
 
   const getThirtyMinutesAgo = () => {
     const now = new Date();
@@ -109,7 +102,7 @@ const Chart = React.memo(function Chart({ metrics, selectedMetrics, multipleMeas
       }
       dispatch(actions.multipleMeasuramentReceived(formattedData));
     }
-  }, [dispatch, resultSub, data, error, multipleMeasuraments]);
+  }, [dispatch, resultSub, data, error, multipleMeasuraments, multipleMeasuraments.length]);
 
   if (selectedMetrics.length === 0) {
     return null;
@@ -141,14 +134,6 @@ const Chart = React.memo(function Chart({ metrics, selectedMetrics, multipleMeas
       </ResponsiveContainer>
     </div>
   );
-}, shouldRender);
+}
 
-const mapStateToProps = (state: IState) => {
-  return {
-    metrics: getMetrics(state),
-    selectedMetrics: getSelectedMetrics(state),
-    multipleMeasuraments: getMultipleMeasurements(state),
-  };
-};
-
-export default connect(mapStateToProps)(Chart);
+export default Chart;
